@@ -2,7 +2,7 @@
 #include "tools.h"
 #include "Eigen/Dense"
 #include <iostream>
-#inclide <cmath>
+#include <cmath>
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -12,7 +12,7 @@ using std::vector;
 /*
  * Constructor.
  */
-FusionEKF::FusionEKF() {
+FusionEKF::FusionEKF() : noise_ax(9), noise_ay(9)  {
   is_initialized_ = false;
 
   previous_timestamp_ = 0;
@@ -36,9 +36,6 @@ FusionEKF::FusionEKF() {
         0, 0.0009, 0,
         0, 0, 0.09;
 
-  // process noise ()
-  noise_ax = 9;
-  noise_ay = 9;
 }
 
 /**
@@ -73,8 +70,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
-	  float r = measurement_pack.raw_measurements_(0)
-	  float phi = measurement_pack.raw_measurements_(1)
+	  float r = measurement_pack.raw_measurements_(0);
+	  float phi = measurement_pack.raw_measurements_(1);
 
 	  x_i(0) = r*cos(phi);
 	  x_i(1) = r*sin(phi);
@@ -110,6 +107,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
   // calculate elpased time since last measurement
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
+  float dt_2 = dt*dt;
+  float dt_3 = dt_2*dt;
+  float dt_4 = dt_3*dt;
 
   // update F Matrix
   ekf_.F_(0,2) = dt;
@@ -136,17 +136,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
 	Hj_ = tools.CalculateJacobian(measurement_pack.raw_measurements_);
-    ekf_.H_ = Hj_;
+  ekf_.H_ = Hj_;
 	ekf_.R_ = R_radar_;
 
-	ekf_.UpdateEKF(measurement_pack.raw_measurements_)
+	ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 
   } else {
     // Laser updates
 	ekf_.H_ = H_laser_;
 	ekf_.R_ = R_laser_;
 
-	ekf_.Update(measurement_pack.raw_measurements_)
+	ekf_.Update(measurement_pack.raw_measurements_);
   }
 
   // print the output
