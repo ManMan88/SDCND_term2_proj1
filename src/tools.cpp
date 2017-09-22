@@ -56,13 +56,13 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   else {
     //compute the Jacobian matrix
     float px2py2 = px*px+py*py;
-	float s_px2py2 = sqrt(px2py2);
-	float px2py2_32 = px2py2*s_px2py2;
-	float vp = vx*py-vy*px;
+	  float s_px2py2 = sqrt(px2py2);
+	  float px2py2_32 = px2py2*s_px2py2;
+	  float vp = vx*py-vy*px;
 
-	Hj << px/s_px2py2, py/s_px2py2, 0, 0,
-	    -py/px2py2, px/px2py2, 0, 0,
-	    py*vp/px2py2_32, px*vp/px2py2_32, px/s_px2py2, py/s_px2py2;
+    Hj << px/s_px2py2, py/s_px2py2, 0, 0,
+          -py/px2py2, px/px2py2, 0, 0,
+          py*vp/px2py2_32, -px*vp/px2py2_32, px/s_px2py2, py/s_px2py2;
   }
   return Hj;
 }
