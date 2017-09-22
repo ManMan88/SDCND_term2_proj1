@@ -80,6 +80,8 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   else
     h(2) = (px*vx + py*vy)/sq_x2y2;
 
+
+  // fix +-pi errors between measurement (z) and prediction (h)
   if (z(1) > M_PI - window && h(1) < 0 )
     h(1) += 2*M_PI;
   else if (z(1) < -M_PI + window && h(1) > 0 )

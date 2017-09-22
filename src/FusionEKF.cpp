@@ -29,13 +29,12 @@ FusionEKF::FusionEKF() : noise_ax(9), noise_ay(9)  {
 
   //measurement covariance matrix - laser
   R_laser_ << 0.0225, 0,
-        0, 0.0225;
+              0, 0.0225;
 
   //measurement covariance matrix - radar
   R_radar_ << 0.09, 0, 0,
-        0, 0.0009, 0,
-        0, 0, 0.09;
-
+              0, 0.0009, 0,
+              0, 0, 0.09;
 }
 
 /**
@@ -61,9 +60,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	  MatrixXd F_i = MatrixXd::Identity(4,4);
 	  MatrixXd P_i(4,4);
 	  P_i << 1,0,0,0,
-             0,1,0,0,
-             0,0,1000,0,
-		         0,0,1000,0;
+           0,1,0,0,
+           0,0,1000,0,
+           0,0,1000,0;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -107,6 +106,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   // calculate elapsed time since last measurement
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
   previous_timestamp_ = measurement_pack.timestamp_;
+
   float dt_2 = dt*dt;
   float dt_3 = dt_2*dt;
   float dt_4 = dt_3*dt;
@@ -115,10 +115,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   ekf_.F_(1,3) = dt;
 
   // update Q Matrix
-  ekf_.Q_ <<  dt_4/4*noise_ax, 0, dt_3/2*noise_ax, 0,
-            0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
-            dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
-            0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
+  ekf_.Q_ << dt_4/4*noise_ax, 0, dt_3/2*noise_ax, 0,
+             0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
+             dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
+             0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
 
   ekf_.Predict();
 
@@ -136,13 +136,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // Radar updates
 	  Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.Hj_ = Hj_;
-	  //ekf_.R_ = R_radar_;
 	  ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   }
   else {
     // Laser updates
-	  //ekf_.R_ = R_laser_;
-
 	  ekf_.Update(measurement_pack.raw_measurements_);
   }
 
