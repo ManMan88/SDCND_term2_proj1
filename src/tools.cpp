@@ -48,7 +48,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   float vy = x_state(3);
 
   //check division by zero
-  if (abs(px) < 0.00001 && abs(py) < 0.00001) {
+  if (abs(px) < 0.001 && abs(py) < 0.001) {
 	// if both px and py are 0, return a 0 matrix
 	// in such a case, the state estimation will be the prediction, and the P (uncertainty) will stay the same
     cout << "NOTE - px and py are both 0! Returning a 0 matrix" << endl;
