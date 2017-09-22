@@ -80,8 +80,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   else
     h(2) = (px*vx + py*vy)/sq_x2y2;
 
-  //cout << "h: " << h << endl;
-
   // perform the kalman filter measurement update
   VectorXd y = z - h;
   MatrixXd S = Hj_*P_*Ht + Rr_;
