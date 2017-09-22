@@ -6,7 +6,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using namespace std;
 
-KalmanFilter::KalmanFilter() {}
+KalmanFilter::KalmanFilter(): window(0.2) {}
 
 KalmanFilter::~KalmanFilter() {}
 
@@ -79,6 +79,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     h(2) = 0;
   else
     h(2) = (px*vx + py*vy)/sq_x2y2;
+
+  if (z(1) > M_PI - window && h(1) < 0 )
+    h(1) += 2*M_PI;
+  else if (z(1) < -M_PI + window && h(1) > 0 )
+    h(1) -= 2*M_PI;
 
   // perform the kalman filter measurement update
   VectorXd y = z - h;

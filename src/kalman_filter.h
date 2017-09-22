@@ -66,6 +66,11 @@ public:
    */
   void UpdateEKF(const Eigen::VectorXd &z);
 
+private:
+
+  // create window around +pi -pi to fix cycling bugs
+  const float window;
+
 };
 
 #endif /* KALMAN_FILTER_H_ */
