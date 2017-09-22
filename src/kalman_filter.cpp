@@ -1,5 +1,6 @@
 #include "kalman_filter.h"
 #include <cmath>
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -9,10 +10,15 @@ KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
 
-void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in) {
+void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in, MatrixXd &H_in, MatrixXd &Rl_in, MatrixXd &Rr_in) {
   x_ = x_in;
   P_ = P_in;
   F_ = F_in;
+  Q_ = MatrixXd(4,4);
+  H_ = H_in;
+  Hj_ = MatrixXd(3,4);
+  Rl_ = Rl_in;
+  Rr_ = Rr_in;
 }
 
 void KalmanFilter::Predict() {
@@ -31,11 +37,11 @@ void KalmanFilter::Update(const VectorXd &z) {
     * update the state by using Kalman Filter equations
   */
   MatrixXd Ht = H_.transpose();
-  MatrixXd I = MatrixXd::Identity(3,3);
+  MatrixXd I = MatrixXd::Identity(4,4);
 
   // perform the kalman filter measurement update
   VectorXd y = z - H_*x_;
-  MatrixXd S = H_*P_*Ht + R_;
+  MatrixXd S = H_*P_*Ht + Rl_;
   MatrixXd K = P_*Ht*S.inverse();
 
   x_ = x_ + K*y;
@@ -47,8 +53,9 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
-  MatrixXd Ht = H_.transpose();
-  MatrixXd I = MatrixXd::Identity(3,3);
+  MatrixXd Ht = Hj_.transpose();
+  MatrixXd I = MatrixXd::Identity(4,4);
+
   //recover state parameters
   float px = x_(0);
   float py = x_(1);
@@ -72,11 +79,12 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     h(2) = 0;
   else
     h(2) = (px*vx + py*vy)/sq_x2y2;
+
   // perform the kalman filter measurement update
   VectorXd y = z - h;
-  MatrixXd S = H_*P_*Ht + R_;
+  MatrixXd S = Hj_*P_*Ht + Rr_;
   MatrixXd K = P_*Ht*S.inverse();
 
   x_ = x_ + K*y;
-  P_ = (I - K*H_)*P_;
+  P_ = (I - K*Hj_)*P_;
 }
