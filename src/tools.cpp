@@ -49,21 +49,20 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
   //check division by zero
   if (abs(px) < 0.001 && abs(py) < 0.001) {
-	// if both px and py are 0, return a 0 matrix
-	// in such a case, the state estimation will be the prediction, and the P (uncertainty) will stay the same
-    cout << "NOTE - px and py are both 0! Returning a 0 matrix" << endl;
-	Hj = MatrixXd(3,4);
+	// if both px and py are small, replace them with agreed small values
+    cout << "NOTE - px and py are both small! Returning px = 0.001, py = 0.001" << endl;
+    px = 0.001;
+    py = 0.001;
   }
-  else {
-    //compute the Jacobian matrix
-    float px2py2 = px*px+py*py;
-	  float s_px2py2 = sqrt(px2py2);
-	  float px2py2_32 = px2py2*s_px2py2;
-	  float vp = vx*py-vy*px;
 
-    Hj << px/s_px2py2, py/s_px2py2, 0, 0,
-          -py/px2py2, px/px2py2, 0, 0,
-          py*vp/px2py2_32, -px*vp/px2py2_32, px/s_px2py2, py/s_px2py2;
-  }
+  //compute the Jacobian matrix
+  float px2py2 = px*px+py*py;
+  float s_px2py2 = sqrt(px2py2);
+  float px2py2_32 = px2py2*s_px2py2;
+  float vp = vx*py-vy*px;
+
+  Hj << px/s_px2py2, py/s_px2py2, 0, 0,
+        -py/px2py2, px/px2py2, 0, 0,
+        py*vp/px2py2_32, -px*vp/px2py2_32, px/s_px2py2, py/s_px2py2;
   return Hj;
 }
