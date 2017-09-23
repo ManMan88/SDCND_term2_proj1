@@ -9,6 +9,8 @@
 #include "kalman_filter.h"
 #include "tools.h"
 
+#define DT_THRESHOLD 0.001
+
 class FusionEKF {
 public:
   /**

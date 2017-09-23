@@ -106,21 +106,22 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   // calculate elapsed time since last measurement
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
   previous_timestamp_ = measurement_pack.timestamp_;
+  if (dt > DT_THRESHOLD){
+    float dt_2 = dt*dt;
+    float dt_3 = dt_2*dt;
+    float dt_4 = dt_3*dt;
+    // update F Matrix
+    ekf_.F_(0,2) = dt;
+    ekf_.F_(1,3) = dt;
 
-  float dt_2 = dt*dt;
-  float dt_3 = dt_2*dt;
-  float dt_4 = dt_3*dt;
-  // update F Matrix
-  ekf_.F_(0,2) = dt;
-  ekf_.F_(1,3) = dt;
+    // update Q Matrix
+    ekf_.Q_ << dt_4/4*noise_ax2, 0, dt_3/2*noise_ax2, 0,
+               0, dt_4/4*noise_ay2, 0, dt_3/2*noise_ay2,
+               dt_3/2*noise_ax2, 0, dt_2*noise_ax2, 0,
+               0, dt_3/2*noise_ay2, 0, dt_2*noise_ay2;
 
-  // update Q Matrix
-  ekf_.Q_ << dt_4/4*noise_ax2, 0, dt_3/2*noise_ax2, 0,
-             0, dt_4/4*noise_ay2, 0, dt_3/2*noise_ay2,
-             dt_3/2*noise_ax2, 0, dt_2*noise_ax2, 0,
-             0, dt_3/2*noise_ay2, 0, dt_2*noise_ay2;
-
-  ekf_.Predict();
+    ekf_.Predict();
+  }
 
   /*****************************************************************************
    *  Update
