@@ -36,16 +36,10 @@ void KalmanFilter::Update(const VectorXd &z) {
   TODO:
     * update the state by using Kalman Filter equations
   */
-  MatrixXd Ht = H_.transpose();
-  MatrixXd I = MatrixXd::Identity(4,4);
 
   // perform the kalman filter measurement update
   VectorXd y = z - H_*x_;
-  MatrixXd S = H_*P_*Ht + Rl_;
-  MatrixXd K = P_*Ht*S.inverse();
-
-  x_ = x_ + K*y;
-  P_ = (I - K*H_)*P_;
+  commonUpdate(P_, x_, H_, Rl_, y);
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -53,8 +47,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
-  MatrixXd Ht = Hj_.transpose();
-  MatrixXd I = MatrixXd::Identity(4,4);
 
   //recover state parameters
   float px = x_(0);
@@ -89,9 +81,19 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   // perform the kalman filter measurement update
   VectorXd y = z - h;
-  MatrixXd S = Hj_*P_*Ht + Rr_;
-  MatrixXd K = P_*Ht*S.inverse();
+  commonUpdate(P_, x_, Hj_, Rr_, y);
 
-  x_ = x_ + K*y;
-  P_ = (I - K*Hj_)*P_;
+}
+
+void KalmanFilter::commonUpdate(MatrixXd &P, VectorXd &x, MatrixXd &H, MatrixXd &R, VectorXd &y) {
+
+  MatrixXd Ht = H.transpose();
+  MatrixXd I = MatrixXd::Identity(4,4);
+  MatrixXd P_Ht = P*Ht;
+
+  MatrixXd S = H*P_Ht + R;
+  MatrixXd K = P_Ht*S.inverse();
+
+  x = x + K*y;
+  P = (I - K*H)*P;
 }

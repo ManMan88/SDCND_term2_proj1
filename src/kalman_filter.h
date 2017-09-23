@@ -71,6 +71,9 @@ private:
   // create window around +pi -pi to fix cycling bugs
   const float window;
 
+  // The kalman filter update scheme function
+  void commonUpdate(Eigen::MatrixXd &P, Eigen::VectorXd &x, Eigen::MatrixXd &H, Eigen::MatrixXd &R, Eigen::VectorXd &y);
+
 };
 
 #endif /* KALMAN_FILTER_H_ */
